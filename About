@@ -1,0 +1,316 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { motion } from 'framer-motion';
+import { Target, Heart, Lightbulb, Users, ArrowRight } from 'lucide-react';
+
+export default function About() {
+  const values = [
+    {
+      icon: Target,
+      title: "Performance First",
+      description: "We never compromise on athletic performance. Every product is designed and tested to compete at the highest level."
+    },
+    {
+      icon: Heart,
+      title: "Planet Positive",
+      description: "Sustainability isn't an afterthought—it's built into our DNA. Every decision considers environmental impact."
+    },
+    {
+      icon: Lightbulb,
+      title: "Relentless Innovation",
+      description: "We push boundaries in material science and manufacturing to prove that sustainability and performance are allies."
+    },
+    {
+      icon: Users,
+      title: "Community Driven",
+      description: "From ocean cleanup volunteers to professional athletes, we build meaningful partnerships that amplify our impact."
+    }
+  ];
+
+  const team = [
+    {
+      name: "Alex Rivera",
+      role: "Founder & CEO",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80",
+      bio: "Former pro soccer player turned sustainability advocate"
+    },
+    {
+      name: "Dr. Sarah Chen",
+      role: "Chief Materials Scientist",
+      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=80",
+      bio: "PhD in polymer engineering, 15+ patents in recycled materials"
+    },
+    {
+      name: "Marcus Thompson",
+      role: "Head of Design",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&q=80",
+      bio: "Ex-Nike, 20 years of performance footwear design"
+    },
+    {
+      name: "Elena Ortiz",
+      role: "VP of Operations",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&q=80",
+      bio: "Supply chain expert focused on ethical manufacturing"
+    }
+  ];
+
+  return (
+    <div className="pt-20">
+      {/* Hero */}
+      <section className="relative hero-gradient py-24 lg:py-32 overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#00F5D4]/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-[#00BBF9]/10 rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <span className="inline-block px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white/80 text-sm font-medium mb-6">
+                Our Story
+              </span>
+              <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6 leading-tight">
+                We Believe Athletes Shouldn't Have to Choose
+              </h1>
+              <p className="text-xl text-white/70 leading-relaxed">
+                Trinity was born from a simple idea: the world's best athletes deserve gear that performs 
+                as hard as they do—without costing the planet. We're proving that winning and sustainability 
+                go hand in hand.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative"
+            >
+              <div className="aspect-square rounded-3xl overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&q=80"
+                  alt="Soccer action"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Origin Story */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <img
+                src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&q=80"
+                alt="Ocean cleanup"
+                className="rounded-3xl shadow-2xl"
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <span className="text-sm font-semibold text-[#00F5D4] tracking-wider uppercase mb-4 block">
+                The Beginning
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-bold text-[#0A2647] mb-6">
+                From Beach Cleanup to Global Brand
+              </h2>
+              <div className="space-y-4 text-gray-600 leading-relaxed">
+                <p>
+                  In 2019, our founder Alex Rivera was participating in a beach cleanup in Costa Rica 
+                  when he had a realization. The plastic washing up on shore—the same plastic choking 
+                  our oceans—could be transformed into something beautiful. Something powerful.
+                </p>
+                <p>
+                  With a background as a professional soccer player and a passion for environmental 
+                  justice, Alex assembled a team of world-class material scientists, designers, and 
+                  manufacturing experts. Their mission: create the highest-performing soccer gear on 
+                  the planet, using only recycled and sustainable materials.
+                </p>
+                <p>
+                  Three years of R&D later, Trinity launched with the Eco-Cleat—a shoe that matches 
+                  or exceeds the performance of any competitor, while diverting 15 plastic bottles 
+                  from our oceans per pair.
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Values */}
+      <section className="py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <span className="text-sm font-semibold text-[#00F5D4] tracking-wider uppercase mb-4 block">
+              What Drives Us
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#0A2647] mb-6">
+              Our Core Values
+            </h2>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {values.map((value, index) => (
+              <motion.div
+                key={value.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-white rounded-2xl p-8 hover:shadow-xl transition-shadow"
+              >
+                <div className="w-14 h-14 rounded-xl bg-[#00F5D4]/10 flex items-center justify-center mb-6">
+                  <value.icon className="w-7 h-7 text-[#0A2647]" />
+                </div>
+                <h3 className="text-xl font-semibold text-[#0A2647] mb-3">{value.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{value.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Team */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <span className="text-sm font-semibold text-[#00F5D4] tracking-wider uppercase mb-4 block">
+              The Team
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#0A2647] mb-6">
+              Meet the Founders
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              A diverse team united by a shared vision: proving that sustainability 
+              and performance are not mutually exclusive.
+            </p>
+          </motion.div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {team.map((member, index) => (
+              <motion.div
+                key={member.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="group"
+              >
+                <div className="relative mb-4 rounded-2xl overflow-hidden">
+                  <img
+                    src={member.image}
+                    alt={member.name}
+                    className="w-full aspect-[4/5] object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0A2647]/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+                    <p className="text-white/80 text-sm">{member.bio}</p>
+                  </div>
+                </div>
+                <h4 className="font-semibold text-[#0A2647] text-lg">{member.name}</h4>
+                <p className="text-gray-500">{member.role}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* DTC Mission */}
+      <section className="py-24 bg-[#0A2647]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <span className="text-sm font-semibold text-[#00F5D4] tracking-wider uppercase mb-4 block">
+                Direct to Consumer
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+                Cutting Out the Middleman
+              </h2>
+              <p className="text-lg text-white/70 leading-relaxed mb-8">
+                By selling directly to you, we eliminate unnecessary markups and ensure every dollar 
+                goes toward better materials, fair wages, and environmental impact. No retailers, 
+                no distributors—just premium gear delivered straight to your door.
+              </p>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="p-6 bg-white/10 rounded-2xl">
+                  <div className="text-3xl font-bold text-[#00F5D4] mb-2">40%</div>
+                  <div className="text-white/70 text-sm">Lower prices than traditional retail</div>
+                </div>
+                <div className="p-6 bg-white/10 rounded-2xl">
+                  <div className="text-3xl font-bold text-[#00F5D4] mb-2">100%</div>
+                  <div className="text-white/70 text-sm">Quality control in our hands</div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <img
+                src="https://images.unsplash.com/photo-1553531087-b25a0b9e9b0d?w=600&q=80"
+                alt="Warehouse"
+                className="rounded-3xl"
+              />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-24 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#0A2647] mb-6">
+              Join the Movement
+            </h2>
+            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+              Every purchase is a vote for a cleaner planet and better sports. 
+              Ready to be part of the change?
+            </p>
+            <Link
+              to={createPageUrl('Shop')}
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#0A2647] text-white font-semibold rounded-xl hover:bg-[#144272] transition-colors"
+            >
+              Shop Now
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+    </div>
+  );
+}
