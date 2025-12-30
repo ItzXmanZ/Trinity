@@ -1,0 +1,282 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { base44 } from '@/api/base44Client';
+import { useMutation } from '@tanstack/react-query';
+import { Mail, MapPin, Phone, Send, CheckCircle, MessageSquare, Package, Users, HelpCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+export default function Contact() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: 'general',
+    message: ''
+  });
+  const [submitted, setSubmitted] = useState(false);
+
+  const submitInquiry = useMutation({
+    mutationFn: () => base44.entities.ContactInquiry.create(formData),
+    onSuccess: () => {
+      setSubmitted(true);
+      setFormData({ name: '', email: '', subject: 'general', message: '' });
+    }
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    submitInquiry.mutate();
+  };
+
+  const contactInfo = [
+    {
+      icon: Mail,
+      title: "Email Us",
+      value: "hello@trinity.com",
+      description: "We respond within 24 hours"
+    },
+    {
+      icon: Phone,
+      title: "Call Us",
+      value: "1-800-TRINITY",
+      description: "Mon-Fri 9am-6pm PST"
+    },
+    {
+      icon: MapPin,
+      title: "Visit Us",
+      value: "Los Angeles, CA",
+      description: "By appointment only"
+    }
+  ];
+
+  const faqs = [
+    {
+      icon: Package,
+      question: "How long does shipping take?",
+      answer: "Standard shipping takes 5-7 business days. Express shipping delivers in 2-3 days."
+    },
+    {
+      icon: MessageSquare,
+      question: "What's your return policy?",
+      answer: "30-day hassle-free returns. Just request a prepaid label and send it back."
+    },
+    {
+      icon: Users,
+      question: "Do you offer team discounts?",
+      answer: "Yes! Teams of 10+ players get 15% off. Contact us for custom pricing."
+    },
+    {
+      icon: HelpCircle,
+      question: "How do I find my size?",
+      answer: "Check our size guide on any product page. We recommend going half-size up if between sizes."
+    }
+  ];
+
+  return (
+    <div className="pt-20">
+      {/* Hero */}
+      <section className="hero-gradient py-16 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
+              Get In Touch
+            </h1>
+            <p className="text-lg text-white/70 max-w-2xl mx-auto">
+              Have a question, partnership inquiry, or just want to say hi? 
+              We'd love to hear from you.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Contact Info */}
+      <section className="py-12 bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-3 gap-8">
+            {contactInfo.map((item, index) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="flex items-center gap-4 p-6 rounded-2xl bg-gray-50"
+              >
+                <div className="w-12 h-12 rounded-xl bg-[#00F5D4]/10 flex items-center justify-center flex-shrink-0">
+                  <item.icon className="w-6 h-6 text-[#0A2647]" />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">{item.title}</div>
+                  <div className="font-semibold text-[#0A2647]">{item.value}</div>
+                  <div className="text-xs text-gray-400">{item.description}</div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Form & FAQs */}
+      <section className="py-16 lg:py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-16">
+            {/* Form */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-2xl font-bold text-[#0A2647] mb-6">Send Us a Message</h2>
+              
+              {submitted ? (
+                <div className="bg-white rounded-2xl p-8 text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-[#0A2647] mb-2">Message Sent!</h3>
+                  <p className="text-gray-600 mb-6">We'll get back to you within 24 hours.</p>
+                  <Button
+                    onClick={() => setSubmitted(false)}
+                    variant="outline"
+                  >
+                    Send Another Message
+                  </Button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8 shadow-sm">
+                  <div className="space-y-5">
+                    <div className="grid sm:grid-cols-2 gap-5">
+                      <div>
+                        <Label htmlFor="name">Name</Label>
+                        <Input
+                          id="name"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          required
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          required
+                          className="mt-1"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="subject">Subject</Label>
+                      <Select
+                        value={formData.subject}
+                        onValueChange={(value) => setFormData({ ...formData, subject: value })}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select a topic" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="general">General Inquiry</SelectItem>
+                          <SelectItem value="order">Order Support</SelectItem>
+                          <SelectItem value="partnership">Partnership</SelectItem>
+                          <SelectItem value="press">Press & Media</SelectItem>
+                          <SelectItem value="returns">Returns & Exchanges</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="message">Message</Label>
+                      <Textarea
+                        id="message"
+                        name="message"
+                        value={formData.message}
+                        onChange={handleChange}
+                        required
+                        rows={5}
+                        className="mt-1"
+                        placeholder="Tell us how we can help..."
+                      />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      disabled={submitInquiry.isPending}
+                      className="w-full py-6 bg-[#0A2647] hover:bg-[#144272]"
+                    >
+                      {submitInquiry.isPending ? (
+                        'Sending...'
+                      ) : (
+                        <>
+                          Send Message
+                          <Send className="w-4 h-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </motion.div>
+
+            {/* FAQs */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-2xl font-bold text-[#0A2647] mb-6">Frequently Asked Questions</h2>
+              
+              <div className="space-y-4">
+                {faqs.map((faq, index) => (
+                  <div
+                    key={index}
+                    className="bg-white rounded-2xl p-6 shadow-sm"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-[#00F5D4]/10 flex items-center justify-center flex-shrink-0">
+                        <faq.icon className="w-5 h-5 text-[#0A2647]" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-[#0A2647] mb-2">{faq.question}</h4>
+                        <p className="text-gray-600 text-sm leading-relaxed">{faq.answer}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Partnership CTA */}
+              <div className="mt-8 p-6 rounded-2xl bg-[#0A2647] text-white">
+                <h3 className="font-semibold text-lg mb-2">Looking to Partner?</h3>
+                <p className="text-white/70 text-sm mb-4">
+                  We work with teams, leagues, and retailers who share our sustainability vision.
+                </p>
+                <Button
+                  variant="outline"
+                  className="bg-transparent border-white/30 text-white hover:bg-white/10"
+                  onClick={() => setFormData({ ...formData, subject: 'partnership' })}
+                >
+                  Inquire About Partnerships
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
