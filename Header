@@ -1,0 +1,147 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { Menu, X, ShoppingBag, Leaf } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { motion, AnimatePresence } from 'framer-motion';
+
+export default function Header() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      const sessionId = localStorage.getItem('trinity_session') || 'guest';
+      const items = await base44.entities.CartItem.filter({ session_id: sessionId });
+      const total = items.reduce((sum, item) => sum + item.quantity, 0);
+      setCartCount(total);
+    };
+    fetchCart();
+    
+    window.addEventListener('cart-updated', fetchCart);
+    return () => window.removeEventListener('cart-updated', fetchCart);
+  }, []);
+
+  const navLinks = [
+    { name: 'Shop', href: createPageUrl('Shop') },
+    { name: 'Impact', href: createPageUrl('Sustainability') },
+    { name: 'About', href: createPageUrl('About') },
+    { name: 'Contact', href: createPageUrl('Contact') },
+  ];
+
+  return (
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        isScrolled 
+          ? 'bg-white/95 backdrop-blur-md shadow-sm' 
+          : 'bg-transparent'
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 md:h-20">
+          {/* Logo */}
+          <Link 
+            to={createPageUrl('Home')} 
+            className="flex items-center gap-2 group"
+          >
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 ${
+              isScrolled ? 'bg-[#0A2647]' : 'bg-white/20 backdrop-blur-sm'
+            }`}>
+              <Leaf className={`w-5 h-5 transition-colors ${
+                isScrolled ? 'text-[#00F5D4]' : 'text-white'
+              }`} />
+            </div>
+            <span className={`text-xl font-bold tracking-tight transition-colors ${
+              isScrolled ? 'text-[#0A2647]' : 'text-white'
+            }`}>
+              TRINITY
+            </span>
+          </Link>
+
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-8">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.href}
+                className={`text-sm font-medium tracking-wide transition-all duration-300 hover:opacity-70 ${
+                  isScrolled ? 'text-[#0A2647]' : 'text-white'
+                }`}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Actions */}
+          <div className="flex items-center gap-4">
+            <Link
+              to={createPageUrl('Cart')}
+              className={`relative p-2 rounded-full transition-all ${
+                isScrolled 
+                  ? 'hover:bg-gray-100' 
+                  : 'hover:bg-white/10'
+              }`}
+            >
+              <ShoppingBag className={`w-5 h-5 transition-colors ${
+                isScrolled ? 'text-[#0A2647]' : 'text-white'
+              }`} />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#00F5D4] text-[#0A2647] text-xs font-bold rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className={`md:hidden p-2 rounded-lg transition-all ${
+                isScrolled ? 'hover:bg-gray-100' : 'hover:bg-white/10'
+              }`}
+            >
+              {mobileMenuOpen ? (
+                <X className={isScrolled ? 'text-[#0A2647]' : 'text-white'} />
+              ) : (
+                <Menu className={isScrolled ? 'text-[#0A2647]' : 'text-white'} />
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-white border-t"
+          >
+            <nav className="px-4 py-6 space-y-4">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  to={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-lg font-medium text-[#0A2647] hover:text-[#00F5D4] transition-colors"
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
+  );
+}
