@@ -1,0 +1,117 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
+
+export default function ProductGallery({ images = [] }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
+
+  const defaultImages = [
+    "https://images.unsplash.com/photo-1511886929837-354d827aae26?w=800&q=80",
+    "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=800&q=80",
+    "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=800&q=80",
+    "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?w=800&q=80"
+  ];
+
+  const galleryImages = images.length > 0 ? images : defaultImages;
+
+  const nextImage = () => {
+    setActiveIndex((prev) => (prev + 1) % galleryImages.length);
+  };
+
+  const prevImage = () => {
+    setActiveIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Main Image */}
+      <div className="relative aspect-square rounded-3xl overflow-hidden bg-gray-100">
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={activeIndex}
+            src={galleryImages[activeIndex]}
+            alt={`Product view ${activeIndex + 1}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="w-full h-full object-cover cursor-zoom-in"
+            onClick={() => setIsZoomed(true)}
+          />
+        </AnimatePresence>
+
+        {/* Navigation Arrows */}
+        <button
+          onClick={prevImage}
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors"
+        >
+          <ChevronLeft className="w-5 h-5 text-[#0A2647]" />
+        </button>
+        <button
+          onClick={nextImage}
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors"
+        >
+          <ChevronRight className="w-5 h-5 text-[#0A2647]" />
+        </button>
+
+        {/* Zoom Button */}
+        <button
+          onClick={() => setIsZoomed(true)}
+          className="absolute bottom-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors"
+        >
+          <ZoomIn className="w-5 h-5 text-[#0A2647]" />
+        </button>
+      </div>
+
+      {/* Thumbnails */}
+      <div className="grid grid-cols-4 gap-3">
+        {galleryImages.map((image, index) => (
+          <button
+            key={index}
+            onClick={() => setActiveIndex(index)}
+            className={`aspect-square rounded-xl overflow-hidden transition-all duration-300 ${
+              activeIndex === index
+                ? 'ring-2 ring-[#00F5D4] ring-offset-2'
+                : 'opacity-60 hover:opacity-100'
+            }`}
+          >
+            <img
+              src={image}
+              alt={`Thumbnail ${index + 1}`}
+              className="w-full h-full object-cover"
+            />
+          </button>
+        ))}
+      </div>
+
+      {/* Fullscreen Modal */}
+      <AnimatePresence>
+        {isZoomed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
+            onClick={() => setIsZoomed(false)}
+          >
+            <button
+              className="absolute top-4 right-4 text-white/60 hover:text-white text-sm"
+              onClick={() => setIsZoomed(false)}
+            >
+              Close
+            </button>
+            <motion.img
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              src={galleryImages[activeIndex]}
+              alt="Zoomed product"
+              className="max-w-full max-h-full object-contain rounded-lg"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
