@@ -1,0 +1,16 @@
+import React from 'react';
+import HeroSection from '@/components/home/HeroSection';
+import MissionSection from '@/components/home/MissionSection';
+import ProductHighlight from '@/components/home/ProductHighlight';
+import SocialProof from '@/components/home/SocialProof';
+
+export default function Home() {
+  return (
+    <div>
+      <HeroSection />
+      <MissionSection />
+      <ProductHighlight />
+      <SocialProof />
+    </div>
+  );
+}
