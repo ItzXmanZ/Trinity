@@ -1,0 +1,148 @@
+import React, { useEffect, useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
+import ProductGallery from '@/components/product/ProductGallery';
+import ProductDetails from '@/components/product/ProductDetails';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Recycle, Zap, Shield, Droplets } from 'lucide-react';
+
+export default function Product() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const slug = urlParams.get('slug') || 'eco-cleat';
+
+  const { data: products, isLoading } = useQuery({
+    queryKey: ['products', slug],
+    queryFn: () => base44.entities.Product.filter({ slug }),
+  });
+
+  const product = products?.[0];
+
+  const technicalSpecs = [
+    { label: "Weight", value: "185g (US 9)" },
+    { label: "Upper Material", value: "Recycled Ocean Plastic Flyknit" },
+    { label: "Sole", value: "Recycled Carbon Fiber Composite" },
+    { label: "Stud Configuration", value: "12-point Precision System" },
+    { label: "Water Resistance", value: "IPX4 Rated" },
+    { label: "Origin", value: "Designed in USA, Made Responsibly" }
+  ];
+
+  const sustainabilityInfo = [
+    {
+      icon: Recycle,
+      title: "Ocean Plastic Upper",
+      description: "Each pair uses plastic equivalent to 15 bottles pulled from coastal waters and ocean cleanup initiatives."
+    },
+    {
+      icon: Zap,
+      title: "Carbon Fiber from Waste",
+      description: "Our sole plates are made from reclaimed carbon fiber, giving aerospace waste a second life on the pitch."
+    },
+    {
+      icon: Droplets,
+      title: "Algae-Based Foam",
+      description: "The comfort lining uses Bloom™ foam, made from algae harvested from polluted waterways."
+    },
+    {
+      icon: Shield,
+      title: "Recyclable Design",
+      description: "When your cleats reach end-of-life, send them back. We'll recycle them into the next generation."
+    }
+  ];
+
+  return (
+    <div className="pt-20">
+      {/* Product Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <ProductGallery images={product?.images} />
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <ProductDetails product={product} />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Detailed Tabs */}
+      <section className="bg-gray-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Tabs defaultValue="specs" className="w-full">
+            <TabsList className="w-full max-w-lg mx-auto grid grid-cols-3 mb-12 bg-white shadow-sm">
+              <TabsTrigger value="specs" className="data-[state=active]:bg-[#0A2647] data-[state=active]:text-white">
+                Specifications
+              </TabsTrigger>
+              <TabsTrigger value="sustainability" className="data-[state=active]:bg-[#0A2647] data-[state=active]:text-white">
+                Sustainability
+              </TabsTrigger>
+              <TabsTrigger value="care" className="data-[state=active]:bg-[#0A2647] data-[state=active]:text-white">
+                Care Guide
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="specs">
+              <div className="max-w-3xl mx-auto bg-white rounded-2xl p-8">
+                <h3 className="text-2xl font-bold text-[#0A2647] mb-6">Technical Specifications</h3>
+                <div className="divide-y">
+                  {technicalSpecs.map((spec) => (
+                    <div key={spec.label} className="flex justify-between py-4">
+                      <span className="font-medium text-gray-600">{spec.label}</span>
+                      <span className="text-[#0A2647]">{spec.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="sustainability">
+              <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                {sustainabilityInfo.map((item) => (
+                  <div key={item.title} className="bg-white rounded-2xl p-6">
+                    <div className="w-12 h-12 rounded-xl bg-[#00F5D4]/10 flex items-center justify-center mb-4">
+                      <item.icon className="w-6 h-6 text-[#0A2647]" />
+                    </div>
+                    <h4 className="text-lg font-semibold text-[#0A2647] mb-2">{item.title}</h4>
+                    <p className="text-gray-600 leading-relaxed">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="care">
+              <div className="max-w-3xl mx-auto bg-white rounded-2xl p-8">
+                <h3 className="text-2xl font-bold text-[#0A2647] mb-6">Care Instructions</h3>
+                <div className="space-y-6 text-gray-600 leading-relaxed">
+                  <div>
+                    <h4 className="font-semibold text-[#0A2647] mb-2">After Each Use</h4>
+                    <p>Remove excess mud and debris with a soft brush. Allow to air dry naturally—avoid direct heat sources like radiators or direct sunlight.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-[#0A2647] mb-2">Deep Cleaning</h4>
+                    <p>Use a damp cloth with mild soap. Do not machine wash or submerge in water. The recycled materials maintain their properties best with gentle care.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-[#0A2647] mb-2">Storage</h4>
+                    <p>Store in a cool, dry place. Use the included dust bag to protect from dust and scratches. Consider using shoe trees to maintain shape.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-[#0A2647] mb-2">End of Life</h4>
+                    <p>When your cleats have reached their limit, don't throw them away. Send them back to us using our prepaid return label, and we'll recycle them into new products.</p>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </section>
+    </div>
+  );
+}
