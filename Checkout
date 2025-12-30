@@ -1,0 +1,472 @@
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { base44 } from '@/api/base44Client';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
+import { ArrowLeft, CreditCard, Truck, CheckCircle, Leaf, Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+
+export default function Checkout() {
+  const [step, setStep] = useState(1);
+  const [orderComplete, setOrderComplete] = useState(false);
+  const [orderNumber, setOrderNumber] = useState('');
+  
+  const sessionId = localStorage.getItem('trinity_session') || 'guest';
+
+  const { data: cartItems = [] } = useQuery({
+    queryKey: ['cart', sessionId],
+    queryFn: () => base44.entities.CartItem.filter({ session_id: sessionId }),
+  });
+
+  const [formData, setFormData] = useState({
+    email: '',
+    firstName: '',
+    lastName: '',
+    address: '',
+    city: '',
+    state: '',
+    zip: '',
+    country: 'United States',
+    shippingMethod: 'standard',
+    cardNumber: '',
+    expiry: '',
+    cvv: '',
+    nameOnCard: ''
+  });
+
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const shipping = formData.shippingMethod === 'express' ? 19.99 : (subtotal > 75 ? 0 : 9.99);
+  const tax = subtotal * 0.08;
+  const total = subtotal + shipping + tax;
+  const totalBottles = cartItems.reduce((sum, item) => sum + (item.quantity * 15), 0);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const createOrder = useMutation({
+    mutationFn: async () => {
+      const orderNum = 'TRI-' + Date.now().toString(36).toUpperCase();
+      
+      await base44.entities.Order.create({
+        order_number: orderNum,
+        status: 'confirmed',
+        items: cartItems.map(item => ({
+          product_id: item.product_id,
+          product_name: item.product_name,
+          price: item.price,
+          size: item.size,
+          color: item.color,
+          quantity: item.quantity
+        })),
+        subtotal,
+        shipping,
+        tax,
+        total,
+        customer_email: formData.email,
+        shipping_address: {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zip: formData.zip,
+          country: formData.country
+        },
+        payment_method: 'card'
+      });
+
+      // Clear cart
+      for (const item of cartItems) {
+        await base44.entities.CartItem.delete(item.id);
+      }
+      
+      window.dispatchEvent(new Event('cart-updated'));
+      return orderNum;
+    },
+    onSuccess: (orderNum) => {
+      setOrderNumber(orderNum);
+      setOrderComplete(true);
+    }
+  });
+
+  if (orderComplete) {
+    return (
+      <div className="pt-20 min-h-screen bg-gray-50">
+        <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
+          >
+            <CheckCircle className="w-10 h-10 text-green-600" />
+          </motion.div>
+          <h1 className="text-3xl font-bold text-[#0A2647] mb-2">Order Confirmed!</h1>
+          <p className="text-gray-600 mb-2">Order #{orderNumber}</p>
+          <p className="text-gray-600 mb-8">We've sent a confirmation to {formData.email}</p>
+
+          <div className="bg-[#00F5D4]/10 rounded-2xl p-6 mb-8">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <Leaf className="w-6 h-6 text-[#0A2647]" />
+              <span className="text-xl font-bold text-[#0A2647]">{totalBottles} bottles saved</span>
+            </div>
+            <p className="text-gray-600">Thank you for making a sustainable choice!</p>
+          </div>
+
+          <Link to={createPageUrl('Shop')}>
+            <Button className="bg-[#0A2647] hover:bg-[#144272]">
+              Continue Shopping
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pt-20 min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Back Link */}
+        <Link to={createPageUrl('Cart')} className="inline-flex items-center gap-2 text-gray-600 hover:text-[#0A2647] mb-8">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Cart
+        </Link>
+
+        {/* Progress Steps */}
+        <div className="flex items-center justify-center gap-4 mb-12">
+          {['Shipping', 'Payment', 'Review'].map((label, index) => (
+            <React.Fragment key={label}>
+              <div className="flex items-center gap-2">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                  step > index + 1 ? 'bg-green-500 text-white' :
+                  step === index + 1 ? 'bg-[#0A2647] text-white' : 'bg-gray-200 text-gray-600'
+                }`}>
+                  {step > index + 1 ? <CheckCircle className="w-5 h-5" /> : index + 1}
+                </div>
+                <span className={step === index + 1 ? 'font-semibold text-[#0A2647]' : 'text-gray-500'}>
+                  {label}
+                </span>
+              </div>
+              {index < 2 && <div className="w-16 h-px bg-gray-200" />}
+            </React.Fragment>
+          ))}
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Form */}
+          <div className="lg:col-span-2">
+            {step === 1 && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-white rounded-2xl p-8"
+              >
+                <h2 className="text-xl font-bold text-[#0A2647] mb-6">Shipping Information</h2>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="your@email.com"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="address">Address</Label>
+                    <Input
+                      id="address"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="city">City</Label>
+                      <Input
+                        id="city"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleChange}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="state">State</Label>
+                      <Input
+                        id="state"
+                        name="state"
+                        value={formData.state}
+                        onChange={handleChange}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="zip">ZIP Code</Label>
+                      <Input
+                        id="zip"
+                        name="zip"
+                        value={formData.zip}
+                        onChange={handleChange}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-6">
+                    <Label className="mb-4 block">Shipping Method</Label>
+                    <RadioGroup
+                      value={formData.shippingMethod}
+                      onValueChange={(value) => setFormData({ ...formData, shippingMethod: value })}
+                      className="space-y-3"
+                    >
+                      <div className="flex items-center justify-between p-4 border rounded-xl hover:border-[#0A2647] cursor-pointer">
+                        <div className="flex items-center gap-3">
+                          <RadioGroupItem value="standard" id="standard" />
+                          <div>
+                            <Label htmlFor="standard" className="font-medium cursor-pointer">Standard Shipping</Label>
+                            <p className="text-sm text-gray-500">5-7 business days</p>
+                          </div>
+                        </div>
+                        <span className="font-medium">{subtotal > 75 ? 'FREE' : '$9.99'}</span>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-xl hover:border-[#0A2647] cursor-pointer">
+                        <div className="flex items-center gap-3">
+                          <RadioGroupItem value="express" id="express" />
+                          <div>
+                            <Label htmlFor="express" className="font-medium cursor-pointer">Express Shipping</Label>
+                            <p className="text-sm text-gray-500">2-3 business days</p>
+                          </div>
+                        </div>
+                        <span className="font-medium">$19.99</span>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={() => setStep(2)}
+                  className="w-full mt-8 py-6 bg-[#0A2647] hover:bg-[#144272]"
+                >
+                  Continue to Payment
+                </Button>
+              </motion.div>
+            )}
+
+            {step === 2 && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-white rounded-2xl p-8"
+              >
+                <h2 className="text-xl font-bold text-[#0A2647] mb-6 flex items-center gap-2">
+                  <CreditCard className="w-5 h-5" />
+                  Payment Information
+                </h2>
+
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="nameOnCard">Name on Card</Label>
+                    <Input
+                      id="nameOnCard"
+                      name="nameOnCard"
+                      value={formData.nameOnCard}
+                      onChange={handleChange}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="cardNumber">Card Number</Label>
+                    <Input
+                      id="cardNumber"
+                      name="cardNumber"
+                      value={formData.cardNumber}
+                      onChange={handleChange}
+                      placeholder="1234 5678 9012 3456"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="expiry">Expiry Date</Label>
+                      <Input
+                        id="expiry"
+                        name="expiry"
+                        value={formData.expiry}
+                        onChange={handleChange}
+                        placeholder="MM/YY"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="cvv">CVV</Label>
+                      <Input
+                        id="cvv"
+                        name="cvv"
+                        value={formData.cvv}
+                        onChange={handleChange}
+                        placeholder="123"
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 text-sm text-gray-500 mt-6">
+                  <Lock className="w-4 h-4" />
+                  Your payment is secured with 256-bit encryption
+                </div>
+
+                <div className="flex gap-4 mt-8">
+                  <Button
+                    onClick={() => setStep(1)}
+                    variant="outline"
+                    className="flex-1 py-6"
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={() => setStep(3)}
+                    className="flex-1 py-6 bg-[#0A2647] hover:bg-[#144272]"
+                  >
+                    Review Order
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
+            {step === 3 && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-white rounded-2xl p-8"
+              >
+                <h2 className="text-xl font-bold text-[#0A2647] mb-6">Review Your Order</h2>
+
+                {/* Order Items */}
+                <div className="divide-y">
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="flex gap-4 py-4">
+                      <img
+                        src={item.product_image || 'https://images.unsplash.com/photo-1511886929837-354d827aae26?w=100&q=80'}
+                        alt={item.product_name}
+                        className="w-16 h-16 rounded-lg object-cover"
+                      />
+                      <div className="flex-1">
+                        <h4 className="font-medium text-[#0A2647]">{item.product_name}</h4>
+                        <p className="text-sm text-gray-500">Size: {item.size} • Qty: {item.quantity}</p>
+                      </div>
+                      <div className="font-semibold">${(item.price * item.quantity).toFixed(2)}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Shipping Info */}
+                <div className="mt-6 pt-6 border-t">
+                  <h3 className="font-medium text-[#0A2647] mb-2 flex items-center gap-2">
+                    <Truck className="w-4 h-4" /> Shipping to
+                  </h3>
+                  <p className="text-gray-600">
+                    {formData.firstName} {formData.lastName}<br />
+                    {formData.address}<br />
+                    {formData.city}, {formData.state} {formData.zip}
+                  </p>
+                </div>
+
+                <div className="flex gap-4 mt-8">
+                  <Button
+                    onClick={() => setStep(2)}
+                    variant="outline"
+                    className="flex-1 py-6"
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={() => createOrder.mutate()}
+                    disabled={createOrder.isPending}
+                    className="flex-1 py-6 bg-[#0A2647] hover:bg-[#144272]"
+                  >
+                    {createOrder.isPending ? 'Processing...' : `Place Order — $${total.toFixed(2)}`}
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </div>
+
+          {/* Order Summary */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-2xl p-6 sticky top-28">
+              <h3 className="font-bold text-[#0A2647] mb-4">Order Summary</h3>
+
+              {/* Impact */}
+              <div className="flex items-center gap-3 p-4 bg-[#00F5D4]/10 rounded-xl mb-6">
+                <Leaf className="w-5 h-5 text-[#0A2647]" />
+                <div className="text-sm">
+                  <span className="font-semibold text-[#0A2647]">{totalBottles} bottles</span>
+                  <span className="text-gray-600"> diverted from oceans</span>
+                </div>
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Subtotal</span>
+                  <span>${subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Shipping</span>
+                  <span>{shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Tax</span>
+                  <span>${tax.toFixed(2)}</span>
+                </div>
+                <div className="h-px bg-gray-200 my-2" />
+                <div className="flex justify-between text-lg font-bold text-[#0A2647]">
+                  <span>Total</span>
+                  <span>${total.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
