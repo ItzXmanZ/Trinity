@@ -1,0 +1,255 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Check, Truck, RotateCcw, Shield, Leaf, ShoppingBag, Heart } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+
+export default function ProductDetails({ product }) {
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0]?.name || 'Ocean Blue');
+  const [quantity, setQuantity] = useState(1);
+  const [isAdding, setIsAdding] = useState(false);
+  const [added, setAdded] = useState(false);
+
+  const defaultProduct = {
+    name: "Eco-Cleat Pro",
+    tagline: "Championship Performance. Zero Compromise.",
+    price: 199,
+    compare_price: 249,
+    sizes: ['US 6', 'US 7', 'US 8', 'US 9', 'US 10', 'US 11', 'US 12', 'US 13'],
+    colors: [
+      { name: 'Ocean Blue', hex: '#0A2647' },
+      { name: 'Arctic White', hex: '#FFFFFF' },
+      { name: 'Neon Rush', hex: '#00F5D4' }
+    ],
+    sustainability_metrics: {
+      bottles_recycled: 15,
+      carbon_saved_kg: 2.3,
+      ocean_plastic_grams: 350
+    },
+    features: [
+      "100% recycled ocean plastic upper",
+      "Recycled carbon fiber sole plate",
+      "Ultra-lightweight 185g design",
+      "12-point precision stud system",
+      "Water-resistant coating"
+    ]
+  };
+
+  const p = product || defaultProduct;
+  const sizes = p.sizes || defaultProduct.sizes;
+  const colors = p.colors || defaultProduct.colors;
+
+  const handleAddToCart = async () => {
+    if (!selectedSize) return;
+    
+    setIsAdding(true);
+    
+    let sessionId = localStorage.getItem('trinity_session');
+    if (!sessionId) {
+      sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('trinity_session', sessionId);
+    }
+
+    await base44.entities.CartItem.create({
+      product_id: product?.id || 'eco-cleat',
+      product_name: p.name,
+      product_image: product?.images?.[0] || 'https://images.unsplash.com/photo-1511886929837-354d827aae26?w=400&q=80',
+      price: p.price,
+      size: selectedSize,
+      color: selectedColor,
+      quantity: quantity,
+      session_id: sessionId
+    });
+
+    setIsAdding(false);
+    setAdded(true);
+    window.dispatchEvent(new Event('cart-updated'));
+    
+    setTimeout(() => setAdded(false), 3000);
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Title & Price */}
+      <div>
+        <h1 className="text-3xl lg:text-4xl font-bold text-[#0A2647] mb-2">
+          {p.name}
+        </h1>
+        <p className="text-lg text-gray-600 mb-4">{p.tagline}</p>
+        <div className="flex items-baseline gap-3">
+          <span className="text-3xl font-bold text-[#0A2647]">${p.price}</span>
+          {p.compare_price && (
+            <span className="text-lg text-gray-400 line-through">${p.compare_price}</span>
+          )}
+          {p.compare_price && (
+            <span className="px-2 py-1 bg-[#00F5D4]/10 text-[#0A2647] text-sm font-medium rounded-lg">
+              Save ${p.compare_price - p.price}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Sustainability Badge */}
+      <div className="flex items-center gap-3 p-4 bg-[#00F5D4]/10 rounded-2xl">
+        <div className="w-12 h-12 bg-[#00F5D4] rounded-xl flex items-center justify-center">
+          <Leaf className="w-6 h-6 text-[#0A2647]" />
+        </div>
+        <div>
+          <div className="font-semibold text-[#0A2647]">
+            {p.sustainability_metrics?.bottles_recycled || 15} Bottles Saved
+          </div>
+          <div className="text-sm text-gray-600">
+            {p.sustainability_metrics?.carbon_saved_kg || 2.3}kg CO₂ prevented per pair
+          </div>
+        </div>
+      </div>
+
+      {/* Color Selection */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <span className="font-medium text-[#0A2647]">Color</span>
+          <span className="text-sm text-gray-500">{selectedColor}</span>
+        </div>
+        <div className="flex gap-3">
+          {colors.map((color) => (
+            <button
+              key={color.name}
+              onClick={() => setSelectedColor(color.name)}
+              className={`w-12 h-12 rounded-full transition-all duration-300 ${
+                selectedColor === color.name
+                  ? 'ring-2 ring-[#00F5D4] ring-offset-2 scale-110'
+                  : 'hover:scale-105'
+              }`}
+              style={{ 
+                backgroundColor: color.hex,
+                border: color.hex === '#FFFFFF' ? '2px solid #e5e7eb' : 'none'
+              }}
+              title={color.name}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Size Selection */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <span className="font-medium text-[#0A2647]">Size</span>
+          <button className="text-sm text-[#00F5D4] hover:underline">Size Guide</button>
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+          {sizes.map((size) => (
+            <button
+              key={size}
+              onClick={() => setSelectedSize(size)}
+              className={`py-3 rounded-xl font-medium transition-all duration-300 ${
+                selectedSize === size
+                  ? 'bg-[#0A2647] text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {size}
+            </button>
+          ))}
+        </div>
+        {!selectedSize && (
+          <p className="text-sm text-red-500 mt-2">Please select a size</p>
+        )}
+      </div>
+
+      {/* Quantity */}
+      <div>
+        <span className="font-medium text-[#0A2647] block mb-3">Quantity</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center bg-gray-100 rounded-xl">
+            <button
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              className="px-4 py-3 text-lg font-medium hover:bg-gray-200 rounded-l-xl transition-colors"
+            >
+              −
+            </button>
+            <span className="px-6 py-3 font-semibold">{quantity}</span>
+            <button
+              onClick={() => setQuantity(quantity + 1)}
+              className="px-4 py-3 text-lg font-medium hover:bg-gray-200 rounded-r-xl transition-colors"
+            >
+              +
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Add to Cart */}
+      <div className="flex gap-3">
+        <Button
+          onClick={handleAddToCart}
+          disabled={!selectedSize || isAdding}
+          className={`flex-1 py-6 text-lg font-semibold rounded-xl transition-all duration-300 ${
+            added
+              ? 'bg-green-500 hover:bg-green-600'
+              : 'bg-[#0A2647] hover:bg-[#144272]'
+          }`}
+        >
+          {isAdding ? (
+            <span className="flex items-center gap-2">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+              />
+              Adding...
+            </span>
+          ) : added ? (
+            <span className="flex items-center gap-2">
+              <Check className="w-5 h-5" />
+              Added to Cart!
+            </span>
+          ) : (
+            <span className="flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5" />
+              Add to Cart — ${p.price * quantity}
+            </span>
+          )}
+        </Button>
+        <Button
+          variant="outline"
+          className="px-4 py-6 rounded-xl border-2 border-gray-200 hover:border-[#00F5D4] hover:bg-[#00F5D4]/5"
+        >
+          <Heart className="w-5 h-5" />
+        </Button>
+      </div>
+
+      {/* Trust Badges */}
+      <div className="grid grid-cols-3 gap-4 pt-6 border-t">
+        <div className="text-center">
+          <Truck className="w-6 h-6 mx-auto mb-2 text-[#0A2647]" />
+          <div className="text-sm font-medium text-[#0A2647]">Free Shipping</div>
+          <div className="text-xs text-gray-500">Orders over $75</div>
+        </div>
+        <div className="text-center">
+          <RotateCcw className="w-6 h-6 mx-auto mb-2 text-[#0A2647]" />
+          <div className="text-sm font-medium text-[#0A2647]">30-Day Returns</div>
+          <div className="text-xs text-gray-500">Hassle-free</div>
+        </div>
+        <div className="text-center">
+          <Shield className="w-6 h-6 mx-auto mb-2 text-[#0A2647]" />
+          <div className="text-sm font-medium text-[#0A2647]">1-Year Warranty</div>
+          <div className="text-xs text-gray-500">Full coverage</div>
+        </div>
+      </div>
+
+      {/* Features */}
+      <div className="pt-6 border-t">
+        <h3 className="font-semibold text-[#0A2647] mb-4">Key Features</h3>
+        <ul className="space-y-3">
+          {(p.features || defaultProduct.features).map((feature, index) => (
+            <li key={index} className="flex items-start gap-3">
+              <Check className="w-5 h-5 text-[#00F5D4] mt-0.5 flex-shrink-0" />
+              <span className="text-gray-600">{feature}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
