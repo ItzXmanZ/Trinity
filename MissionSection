@@ -1,0 +1,123 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Waves, Recycle, Trophy, Globe } from 'lucide-react';
+
+export default function MissionSection() {
+  const features = [
+    {
+      icon: Waves,
+      title: "Ocean Cleanup Partner",
+      description: "We partner with global ocean cleanup initiatives, funding the removal of plastic waste from our waterways with every purchase."
+    },
+    {
+      icon: Recycle,
+      title: "Circular Design",
+      description: "Every component is designed for recyclability. Send back your worn cleats, and we'll give them a second life."
+    },
+    {
+      icon: Trophy,
+      title: "Pro Performance",
+      description: "Tested and trusted by professional athletes. No compromises on speed, agility, or ball control."
+    },
+    {
+      icon: Globe,
+      title: "Carbon Neutral",
+      description: "From manufacturing to doorstep, we offset 100% of our carbon footprint through verified programs."
+    }
+  ];
+
+  return (
+    <section className="py-24 lg:py-32 bg-white overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16 lg:mb-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <span className="text-sm font-semibold text-[#00F5D4] tracking-wider uppercase mb-4 block">
+              Our Mission
+            </span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#0A2647] mb-6">
+              Performance Meets Planet
+            </h2>
+            <p className="text-lg text-gray-600 leading-relaxed">
+              We believe athletes shouldn't have to choose between winning and protecting the environment. 
+              That's why we've engineered gear that delivers on both fronts.
+            </p>
+          </motion.div>
+        </div>
+
+        {/* Features Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="group"
+            >
+              <div className="relative p-8 rounded-2xl bg-gray-50 hover:bg-[#0A2647] transition-all duration-500 h-full">
+                <div className="w-14 h-14 rounded-xl bg-[#00F5D4]/10 group-hover:bg-[#00F5D4]/20 flex items-center justify-center mb-6 transition-colors">
+                  <feature.icon className="w-7 h-7 text-[#0A2647] group-hover:text-[#00F5D4] transition-colors" />
+                </div>
+                <h3 className="text-xl font-semibold text-[#0A2647] group-hover:text-white mb-3 transition-colors">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 group-hover:text-white/70 transition-colors leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Impact Counter */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mt-20 lg:mt-24"
+        >
+          <div className="relative rounded-3xl overflow-hidden">
+            <div className="absolute inset-0 hero-gradient" />
+            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1200&q=80')] bg-cover bg-center opacity-20" />
+            
+            <div className="relative z-10 py-16 lg:py-20 px-8 lg:px-16 text-center">
+              <h3 className="text-2xl lg:text-3xl font-bold text-white mb-4">
+                Every Purchase Powers Change
+              </h3>
+              <p className="text-white/70 max-w-2xl mx-auto mb-12 text-lg">
+                Here's the impact our community has made together. These numbers update in real-time.
+              </p>
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-sm">
+                  <div className="text-4xl lg:text-5xl font-bold text-[#00F5D4] mb-2">2.1M</div>
+                  <div className="text-white/70 text-sm">Bottles Recycled</div>
+                </div>
+                <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-sm">
+                  <div className="text-4xl lg:text-5xl font-bold text-[#00F5D4] mb-2">847</div>
+                  <div className="text-white/70 text-sm">Tons CO₂ Saved</div>
+                </div>
+                <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-sm">
+                  <div className="text-4xl lg:text-5xl font-bold text-[#00F5D4] mb-2">23</div>
+                  <div className="text-white/70 text-sm">Countries Reached</div>
+                </div>
+                <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-sm">
+                  <div className="text-4xl lg:text-5xl font-bold text-[#00F5D4] mb-2">50K+</div>
+                  <div className="text-white/70 text-sm">Athletes Joined</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
