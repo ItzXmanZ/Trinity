@@ -1,0 +1,121 @@
+{
+  "name": "Product",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Product name"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-friendly identifier"
+    },
+    "tagline": {
+      "type": "string",
+      "description": "Short marketing tagline"
+    },
+    "description": {
+      "type": "string",
+      "description": "Full product description"
+    },
+    "price": {
+      "type": "number",
+      "description": "Price in USD"
+    },
+    "compare_price": {
+      "type": "number",
+      "description": "Original price for comparison"
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of image URLs"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "cleats",
+        "accessories",
+        "apparel"
+      ],
+      "description": "Product category"
+    },
+    "sizes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Available sizes"
+    },
+    "colors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "hex": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "specs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "materials": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of materials used"
+    },
+    "sustainability_metrics": {
+      "type": "object",
+      "properties": {
+        "bottles_recycled": {
+          "type": "number"
+        },
+        "carbon_saved_kg": {
+          "type": "number"
+        },
+        "ocean_plastic_grams": {
+          "type": "number"
+        }
+      }
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "in_stock": {
+      "type": "boolean",
+      "default": true
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "name",
+    "price",
+    "category"
+  ]
+}
